@@ -3,7 +3,6 @@ package by.youngliqui.service;
 import by.youngliqui.dto.User;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class UserService {
