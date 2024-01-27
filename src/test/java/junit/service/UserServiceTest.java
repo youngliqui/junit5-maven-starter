@@ -4,10 +4,11 @@ import by.youngliqui.dto.User;
 import by.youngliqui.service.UserService;
 import org.junit.jupiter.api.*;
 
+import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 public class UserServiceTest {
@@ -31,7 +32,8 @@ public class UserServiceTest {
     void usersEmptyIfNoUserAdded() {
         System.out.println("Test 1: " + this);
         var users = userService.getAll();
-        assertTrue(users.isEmpty());
+
+        assertThat(users).isEmpty();
     }
 
     @Test
@@ -41,7 +43,22 @@ public class UserServiceTest {
         userService.add(MAXIM);
 
         var users = userService.getAll();
-        assertEquals(2, users.size());
+
+        assertThat(users).hasSize(2);
+    }
+
+    @Test
+    void usersConvertedToMapById() {
+        userService.add(IVAN, MAXIM);
+
+        Map<Integer, User> users = userService.getAllConvertedById();
+
+        assertAll(
+                () -> assertThat(users).containsKeys(IVAN.getId(), MAXIM.getId()),
+                () -> assertThat(users).containsValues(IVAN, MAXIM)
+        );
+
+
     }
 
     @Test
@@ -49,8 +66,8 @@ public class UserServiceTest {
         userService.add(IVAN);
         Optional<User> maybeUser = userService.login(IVAN.getUsername(), IVAN.getPassword());
 
-        assertTrue(maybeUser.isPresent());
-        maybeUser.ifPresent(user -> assertEquals(IVAN, user));
+        assertThat(maybeUser).isPresent();
+        maybeUser.ifPresent(user -> assertThat(user).isEqualTo(IVAN));
     }
 
     @Test
@@ -59,7 +76,7 @@ public class UserServiceTest {
 
         Optional<User> maybeUser = userService.login(IVAN.getUsername(), "dummy");
 
-        assertTrue(maybeUser.isEmpty());
+        assertThat(maybeUser).isEmpty();
     }
 
     @Test
@@ -68,7 +85,7 @@ public class UserServiceTest {
 
         var maybeUser = userService.login("dummy", IVAN.getPassword());
 
-        assertTrue(maybeUser.isEmpty());
+        assertThat(maybeUser).isEmpty();
     }
 
     @AfterEach
