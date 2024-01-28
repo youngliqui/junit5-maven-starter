@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 public class UserServiceTest {
@@ -68,6 +69,24 @@ public class UserServiceTest {
 
         assertThat(maybeUser).isPresent();
         maybeUser.ifPresent(user -> assertThat(user).isEqualTo(IVAN));
+    }
+
+    @Test
+    void throwExceptionIfUsernameOrPasswordIsNull() {
+        assertAll(
+                () -> {
+                    var exception = assertThrows(
+                            IllegalArgumentException.class, () -> userService.login(null, "dummy")
+                    );
+                    assertThat(exception.getMessage()).isEqualTo("username or password is null");
+                },
+                () -> {
+                    var exception = assertThrows(
+                            IllegalArgumentException.class, () -> userService.login("dummy", null)
+                    );
+                    assertThat(exception.getMessage()).isEqualTo("username or password is null");
+                }
+        );
     }
 
     @Test
