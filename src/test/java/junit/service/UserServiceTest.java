@@ -32,6 +32,7 @@ public class UserServiceTest {
     }
 
     @Test
+    @DisplayName("users will be empty if no user added")
     void usersEmptyIfNoUserAdded() {
         System.out.println("Test 1: " + this);
         var users = userService.getAll();
@@ -63,56 +64,6 @@ public class UserServiceTest {
 
 
     }
-
-    @Test
-    @Tag("login")
-    void loginSuccessIfUserExists() {
-        userService.add(IVAN);
-        Optional<User> maybeUser = userService.login(IVAN.getUsername(), IVAN.getPassword());
-
-        assertThat(maybeUser).isPresent();
-        maybeUser.ifPresent(user -> assertThat(user).isEqualTo(IVAN));
-    }
-
-    @Test
-    @Tag("login")
-    void throwExceptionIfUsernameOrPasswordIsNull() {
-        assertAll(
-                () -> {
-                    var exception = assertThrows(
-                            IllegalArgumentException.class, () -> userService.login(null, "dummy")
-                    );
-                    assertThat(exception.getMessage()).isEqualTo("username or password is null");
-                },
-                () -> {
-                    var exception = assertThrows(
-                            IllegalArgumentException.class, () -> userService.login("dummy", null)
-                    );
-                    assertThat(exception.getMessage()).isEqualTo("username or password is null");
-                }
-        );
-    }
-
-    @Test
-    @Tag("login")
-    void loginFailIfPasswordIsNotCorrect() {
-        userService.add(IVAN);
-
-        Optional<User> maybeUser = userService.login(IVAN.getUsername(), "dummy");
-
-        assertThat(maybeUser).isEmpty();
-    }
-
-    @Test
-    @Tag("login")
-    void loginFailIfUserDoesNotExist() {
-        userService.add(IVAN);
-
-        var maybeUser = userService.login("dummy", IVAN.getPassword());
-
-        assertThat(maybeUser).isEmpty();
-    }
-
     @AfterEach
     void deleteDataFromDatabase() {
         System.out.println("After each: " + this);
@@ -121,5 +72,55 @@ public class UserServiceTest {
     @AfterAll
     static void closeConnectionPool() {
         System.out.println("After all: ");
+    }
+
+    @Nested
+    @DisplayName("test user login functionality")
+    @Tag("login")
+    class LoginTest {
+        @Test
+        void loginSuccessIfUserExists() {
+            userService.add(IVAN);
+            Optional<User> maybeUser = userService.login(IVAN.getUsername(), IVAN.getPassword());
+
+            assertThat(maybeUser).isPresent();
+            maybeUser.ifPresent(user -> assertThat(user).isEqualTo(IVAN));
+        }
+
+        @Test
+        void throwExceptionIfUsernameOrPasswordIsNull() {
+            assertAll(
+                    () -> {
+                        var exception = assertThrows(
+                                IllegalArgumentException.class, () -> userService.login(null, "dummy")
+                        );
+                        assertThat(exception.getMessage()).isEqualTo("username or password is null");
+                    },
+                    () -> {
+                        var exception = assertThrows(
+                                IllegalArgumentException.class, () -> userService.login("dummy", null)
+                        );
+                        assertThat(exception.getMessage()).isEqualTo("username or password is null");
+                    }
+            );
+        }
+
+        @Test
+        void loginFailIfPasswordIsNotCorrect() {
+            userService.add(IVAN);
+
+            Optional<User> maybeUser = userService.login(IVAN.getUsername(), "dummy");
+
+            assertThat(maybeUser).isEmpty();
+        }
+
+        @Test
+        void loginFailIfUserDoesNotExist() {
+            userService.add(IVAN);
+
+            var maybeUser = userService.login("dummy", IVAN.getPassword());
+
+            assertThat(maybeUser).isEmpty();
+        }
     }
 }
