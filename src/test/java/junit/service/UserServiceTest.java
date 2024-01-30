@@ -6,15 +6,16 @@ import junit.paramresolver.UserServiceParamResolver;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.*;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("user")
 @Tag("fast")
@@ -128,6 +129,16 @@ public class UserServiceTest {
         }
 
         @Test
+        void checkLoginFunctionalityPerformance() {
+            var result = assertTimeout(Duration.ofMillis(400L), () -> {
+                Thread.sleep(500L);
+                return userService.login("dummy", IVAN.getPassword());
+            });
+        }
+
+
+        //        @Test
+        @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
         void loginFailIfUserDoesNotExist() {
             userService.add(IVAN);
 
