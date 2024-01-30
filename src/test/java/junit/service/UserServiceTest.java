@@ -2,7 +2,9 @@ package junit.service;
 
 import by.youngliqui.dto.User;
 import by.youngliqui.service.UserService;
+import junit.paramresolver.UserServiceParamResolver;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Map;
 import java.util.Optional;
@@ -14,11 +16,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Tag("user")
 @Tag("fast")
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
+@ExtendWith({
+        UserServiceParamResolver.class
+})
 public class UserServiceTest {
     private static final User IVAN = User.of(1, "Ivan", "2223");
     private static final User MAXIM = User.of(2, "Maxim", "1212");
 
     private UserService userService;
+
+    UserServiceTest(TestInfo testInfo) {
+        System.out.println();
+    }
 
     @BeforeAll
     static void init() {
@@ -26,9 +35,9 @@ public class UserServiceTest {
     }
 
     @BeforeEach
-    void prepare() {
+    void prepare(UserService userService) {
         System.out.println("Before each: " + this);
-        userService = new UserService();
+        this.userService = userService;
     }
 
     @Test
