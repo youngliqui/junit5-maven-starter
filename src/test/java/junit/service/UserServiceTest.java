@@ -5,9 +5,12 @@ import by.youngliqui.service.UserService;
 import junit.paramresolver.UserServiceParamResolver;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.*;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -73,6 +76,7 @@ public class UserServiceTest {
 
 
     }
+
     @AfterEach
     void deleteDataFromDatabase() {
         System.out.println("After each: " + this);
@@ -131,5 +135,37 @@ public class UserServiceTest {
 
             assertThat(maybeUser).isEmpty();
         }
+
+        @ParameterizedTest(name = "{arguments} test")
+//    @ArgumentsSource()
+//        @NullSource
+//        @EmptySource
+//    @NullAndEmptySource
+//        @ValueSource(strings = {
+//                "Ivan", "Maxim"
+//        })
+//    @EnumSource
+        @MethodSource("junit.service.UserServiceTest#getArgumentsForLoginTest")
+//        @CsvFileSource(resources = "/login-test-data.csv", delimiter = ',', numLinesToSkip = 1)
+//        @CsvSource({
+//                "Ivan,2223",
+//                "Maxim,1212"
+//        })
+        @DisplayName("login param test")
+        void loginParametrizedTest(String username, String password, Optional<User> user) {
+            userService.add(IVAN, MAXIM);
+
+            var maybeUser = userService.login(username, password);
+            assertThat(maybeUser).isEqualTo(user);
+        }
+    }
+
+    static Stream<Arguments> getArgumentsForLoginTest() {
+        return Stream.of(
+                Arguments.of("Ivan", "2223", Optional.of(IVAN)),
+                Arguments.of("Maxim", "1212", Optional.of(MAXIM)),
+                Arguments.of("Petr", "dummy", Optional.empty()),
+                Arguments.of("dummy", "1212", Optional.empty())
+        );
     }
 }
