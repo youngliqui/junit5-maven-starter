@@ -1,4 +1,4 @@
-package junit.paramresolver;
+package junit.extension;
 
 import by.youngliqui.service.UserService;
 import org.junit.jupiter.api.extension.ExtensionContext;

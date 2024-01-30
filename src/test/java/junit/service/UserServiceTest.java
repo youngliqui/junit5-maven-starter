@@ -2,9 +2,13 @@ package junit.service;
 
 import by.youngliqui.dto.User;
 import by.youngliqui.service.UserService;
-import junit.paramresolver.UserServiceParamResolver;
+import junit.extension.ConditionalExtension;
+import junit.extension.GlobalExtension;
+import junit.extension.ThrowableException;
+import junit.extension.UserServiceParamResolver;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -21,7 +25,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("fast")
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith({
-        UserServiceParamResolver.class
+        UserServiceParamResolver.class,
+        GlobalExtension.class,
+        ConditionalExtension.class,
+        ThrowableException.class
 })
 public class UserServiceTest {
     private static final User IVAN = User.of(1, "Ivan", "2223");
