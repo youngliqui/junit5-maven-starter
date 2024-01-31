@@ -3,6 +3,7 @@ package junit.service;
 import by.youngliqui.dao.UserDao;
 import by.youngliqui.dto.User;
 import by.youngliqui.service.UserService;
+import junit.dao.UserDaoSpy;
 import junit.extension.ConditionalExtension;
 import junit.extension.GlobalExtension;
 import junit.extension.ThrowableException;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.time.Duration;
@@ -51,7 +53,8 @@ public class UserServiceTest {
     @BeforeEach
     void prepare() {
         System.out.println("Before each: " + this);
-        this.userDao = Mockito.mock(UserDao.class);
+//        this.userDao = Mockito.mock(UserDao.class);
+        this.userDao = Mockito.spy(new UserDao());
         this.userService = new UserService(userDao);
     }
 
@@ -90,7 +93,7 @@ public class UserServiceTest {
     @Test
     void shouldDeleteExistedUser() {
         userService.add(IVAN);
-//        Mockito.doReturn(true).when(userDao).delete(IVAN.getId());
+        Mockito.doReturn(true).when(userDao).delete(IVAN.getId());
 //        Mockito.doReturn(true).when(userDao).delete(Mockito.any());
 
         Mockito.when(userDao.delete(IVAN.getId()))
@@ -98,9 +101,15 @@ public class UserServiceTest {
                 .thenReturn(false);
 
         var deleteResult = userService.delete(IVAN.getId());
+
+        System.out.println(userService.delete(IVAN.getId()));
+        System.out.println(userService.delete(IVAN.getId()));
+
+        var argumentCapture = ArgumentCaptor.forClass(Integer.class);
+        Mockito.verify(userDao, Mockito.times(3)).delete(argumentCapture.capture());
+
+        assertThat(argumentCapture.getValue()).isEqualTo(IVAN.getId());
         assertThat(deleteResult).isTrue();
-        System.out.println(userService.delete(IVAN.getId()));
-        System.out.println(userService.delete(IVAN.getId()));
     }
 
     @AfterEach
@@ -155,8 +164,8 @@ public class UserServiceTest {
 
         @Test
         void checkLoginFunctionalityPerformance() {
-            var result = assertTimeout(Duration.ofMillis(400L), () -> {
-                Thread.sleep(500L);
+            var result = assertTimeout(Duration.ofMillis(110L), () -> {
+                Thread.sleep(100L);
                 return userService.login("dummy", IVAN.getPassword());
             });
         }
