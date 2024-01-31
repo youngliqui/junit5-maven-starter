@@ -1,5 +1,6 @@
 package junit.service;
 
+import by.youngliqui.dao.UserDao;
 import by.youngliqui.dto.User;
 import by.youngliqui.service.UserService;
 import junit.extension.ConditionalExtension;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
 
 import java.time.Duration;
 import java.util.Map;
@@ -28,12 +30,13 @@ import static org.junit.jupiter.api.Assertions.*;
         UserServiceParamResolver.class,
         GlobalExtension.class,
         ConditionalExtension.class,
-        ThrowableException.class
+//        ThrowableException.class
 })
 public class UserServiceTest {
     private static final User IVAN = User.of(1, "Ivan", "2223");
     private static final User MAXIM = User.of(2, "Maxim", "1212");
 
+    private UserDao userDao;
     private UserService userService;
 
     UserServiceTest(TestInfo testInfo) {
@@ -46,9 +49,10 @@ public class UserServiceTest {
     }
 
     @BeforeEach
-    void prepare(UserService userService) {
+    void prepare() {
         System.out.println("Before each: " + this);
-        this.userService = userService;
+        this.userDao = Mockito.mock(UserDao.class);
+        this.userService = new UserService(userDao);
     }
 
     @Test
@@ -81,8 +85,22 @@ public class UserServiceTest {
                 () -> assertThat(users).containsKeys(IVAN.getId(), MAXIM.getId()),
                 () -> assertThat(users).containsValues(IVAN, MAXIM)
         );
+    }
 
+    @Test
+    void shouldDeleteExistedUser() {
+        userService.add(IVAN);
+//        Mockito.doReturn(true).when(userDao).delete(IVAN.getId());
+//        Mockito.doReturn(true).when(userDao).delete(Mockito.any());
 
+        Mockito.when(userDao.delete(IVAN.getId()))
+                .thenReturn(true)
+                .thenReturn(false);
+
+        var deleteResult = userService.delete(IVAN.getId());
+        assertThat(deleteResult).isTrue();
+        System.out.println(userService.delete(IVAN.getId()));
+        System.out.println(userService.delete(IVAN.getId()));
     }
 
     @AfterEach
