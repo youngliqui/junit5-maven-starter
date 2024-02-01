@@ -111,9 +111,13 @@ public class UserServiceTest {
 //        Mockito.doReturn(true).when(userDao).delete(IVAN.getId());
 //        Mockito.doReturn(true).when(userDao).delete(Mockito.any());
 
-        Mockito.when(userDao.delete(IVAN.getId()))
-                .thenReturn(true)
-                .thenReturn(false);
+//        Mockito.when(userDao.delete(IVAN.getId()))
+//                .thenReturn(true)
+//                .thenReturn(false);
+
+        BDDMockito.given(userDao.delete(IVAN.getId())).willReturn(true);
+
+//        BDDMockito.willReturn(true).given(userDao.delete(IVAN.getId()));
 
         var deleteResult = userService.delete(IVAN.getId());
 
